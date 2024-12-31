@@ -16,42 +16,45 @@ trait InteractsWithInject
     {
         if ($this->app->config->get('annotation.inject.enable', true)) {
             $this->app->resolving(function ($object, $app){
-                $class=get_class($object);
-                if ($this->isInjectClass($class)) {
+                if (is_object($object))
+                {
+                    $class=get_class($object);
+                    if ($this->isInjectClass($class)) {
 
-                    if (!$app->has($class))
-                    {
-                        $app->bind($class,$object);
-                    }
+                        if (!$app->has($class))
+                        {
+                            $app->bind($class,$object);
+                        }
 
-                    $refObject = new ReflectionObject($object);
-                    foreach ($refObject->getProperties() as $refProperty) {
-                        if ($refProperty->isDefault() && !$refProperty->isStatic()) {
-                            $attrs = $refProperty->getAttributes(Inject::class);
-                            if (!empty($attrs)) {
-                                if (!empty($attrs[0]->getArguments()[0])) {
-                                    $type = $attrs[0]->getArguments()[0];
-                                } elseif ($refProperty->getType() && !$refProperty->getType()->isBuiltin()) {
-                                    $type = $refProperty->getType()->getName();
-                                }
-
-                                if (isset($type)) {
-                                    if ($app->has($type))
-                                    {
-                                        $value=$app->get($type);
-                                    }else{
-                                        $value = $app->make($type);
+                        $refObject = new ReflectionObject($object);
+                        foreach ($refObject->getProperties() as $refProperty) {
+                            if ($refProperty->isDefault() && !$refProperty->isStatic()) {
+                                $attrs = $refProperty->getAttributes(Inject::class);
+                                if (!empty($attrs)) {
+                                    if (!empty($attrs[0]->getArguments()[0])) {
+                                        $type = $attrs[0]->getArguments()[0];
+                                    } elseif ($refProperty->getType() && !$refProperty->getType()->isBuiltin()) {
+                                        $type = $refProperty->getType()->getName();
                                     }
-                                    if (!$refProperty->isPublic()) {
-                                        $refProperty->setAccessible(true);
+
+                                    if (isset($type)) {
+                                        if ($app->has($type))
+                                        {
+                                            $value=$app->get($type);
+                                        }else{
+                                            $value = $app->make($type);
+                                        }
+                                        if (!$refProperty->isPublic()) {
+                                            $refProperty->setAccessible(true);
+                                        }
+                                        $refProperty->setValue($object, $value);
                                     }
-                                    $refProperty->setValue($object, $value);
                                 }
                             }
                         }
-                    }
-                    if ($refObject->hasMethod('__injected')) {
-                        $app->invokeMethod([$object, '__injected']);
+                        if ($refObject->hasMethod('__injected')) {
+                            $app->invokeMethod([$object, '__injected']);
+                        }
                     }
                 }
             });
