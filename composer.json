@@ -9,9 +9,8 @@
         }
     ],
     "require": {
-        "php": ">=8.0",
-        "topthink/framework": "^6.0||^8.0",
-        "ergebnis/classy": "^1.4"
+        "topthink/framework": "^6.0 || ^8.0",
+        "topthink/think-orm": "^4.0"
     },
     "require-dev": {
         "topthink/think-ide-helper": "^1.0"
