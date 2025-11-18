@@ -16,6 +16,9 @@ trait InteractsWithInject
     {
         if ($this->app->config->get('annotation.inject.enable', true)) {
             $this->app->resolving(function ($object, $app){
+                if (!is_object($object)){
+                    return;
+                }
                 $class=get_class($object);
                 if ($this->isInjectClass($class)) {
                     if (!$app->has($class))
