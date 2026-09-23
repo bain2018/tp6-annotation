@@ -44,9 +44,6 @@ trait InteractsWithInject
                                     }else{
                                         $value = $app->make($type);
                                     }
-                                    if (!$refProperty->isPublic()) {
-                                        $refProperty->setAccessible(true);
-                                    }
                                     $refProperty->setValue($object, $value);
                                 }
                             }
